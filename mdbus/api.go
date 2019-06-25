@@ -3,7 +3,24 @@ package mdbus
 import (
 	"encoding/json"
 	"fmt"
+	"time"
 )
+
+//JInfoModbuses json for all modbuses
+type JInfoModbuses struct {
+	Name     string    `json:"name"`
+	Modbuses []JModbus `json:"modbuses"`
+}
+
+//JModbus jsom one modbus
+type JModbus struct {
+	Name    string    `json:"name"`
+	IP1     string    `json:"ip1"`
+	IP2     string    `json:"ip2"`
+	Port    int       `json:"port"`
+	LastOp1 time.Time `json:"lastop1"`
+	LastOp2 time.Time `json:"lastop2"`
+}
 
 //JFullInfo для возврата JSON с полным описанием всех переменных Модбаса
 type JFullInfo struct {
@@ -88,6 +105,24 @@ func (d *Driver) GetFullInfo() (string, error) {
 		r.Format = reg.format
 		r.Type = reg.regtype
 		j.Registers = append(j.Registers, *r)
+	}
+	res, err := json.Marshal(j)
+	return string(res), err
+}
+
+//GetInfoModbuses return json define all modbuses
+func GetInfoModbuses(mbs map[string]*Driver) (string, error) {
+	j := new(JInfoModbuses)
+	j.Name = "modbuses"
+	for _, mb := range mbs {
+		jm := new(JModbus)
+		jm.Name = mb.Name
+		jm.IP1 = mb.IP
+		jm.IP2 = mb.IP2
+		jm.Port = mb.Port
+		jm.LastOp1 = mb.LastOp(1)
+		jm.LastOp2 = mb.LastOp(2)
+		j.Modbuses = append(j.Modbuses, *jm)
 	}
 	res, err := json.Marshal(j)
 	return string(res), err

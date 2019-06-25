@@ -23,7 +23,7 @@ type Master struct {
 	mu          sync.Mutex
 	Step        int
 	con         string
-	lastop      time.Time
+	lastoper    time.Time
 }
 
 func master(d *Driver, con string) (*Master, error) {
@@ -40,7 +40,7 @@ func master(d *Driver, con string) (*Master, error) {
 	m.master.Timeout = time.Second
 	m.master.SlaveId = 1
 	m.connected = false
-	m.lastop = time.Unix(0, 0)
+	m.lastoper = time.Unix(0, 0)
 	// m.master.Logger = fmt
 	return m, nil
 }
@@ -210,7 +210,7 @@ func (m *Master) run() {
 		m.readAllDI()
 		m.readAllIR()
 		m.readAllHR()
-		m.lastop = time.Now()
+		m.lastoper = time.Now()
 		if !m.work {
 			break
 		}
@@ -276,4 +276,7 @@ func (m *Master) lock() {
 }
 func (m *Master) unlock() {
 	m.mu.Unlock()
+}
+func (m *Master) lastop() time.Time {
+	return m.lastoper
 }

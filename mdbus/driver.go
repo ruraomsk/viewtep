@@ -17,6 +17,7 @@ type DeviceInOut interface {
 	lock()
 	unlock()
 	stop()
+	lastop() time.Time
 }
 
 // Driver драйвер одного устройства
@@ -167,4 +168,12 @@ func (d *Driver) ToString() string {
 		s.WriteString(reg.ToString() + " \n")
 	}
 	return s.String()
+}
+
+//LastOp return time last operation on driver
+func (d *Driver) LastOp(chanel int) time.Time {
+	if chanel == 1 {
+		return d.tr.lastop()
+	}
+	return d.tr2.lastop()
 }

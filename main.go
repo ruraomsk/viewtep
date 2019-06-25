@@ -60,39 +60,60 @@ func main() {
 		}
 
 	}
+	fmt.Println("Modbuses.....")
 	for _, drv := range drivers {
 		drv.Run()
+		js, err := drv.GetFullInfo()
+		if err != nil {
+			fmt.Println(err.Error())
+		} else {
+			fmt.Println(js)
+		}
 	}
+	fmt.Println("Variables.....")
+
 	for _, rout := range routers {
 		rout.Start()
+		js, err := rout.GetFullInfo()
+		if err != nil {
+			fmt.Println(err.Error())
+		} else {
+			fmt.Println(js)
+		}
 	}
 	// for _, rout := range routers {
-	// 	js, err := rout.GetFullInfo()
-	// 	if err != nil {
-	// 		fmt.Println(err.Error())
-	// 	} else {
-	// 		fmt.Println(js)
-	// 	}
 	// }
 	for true {
-		// for _, drv := range drivers {
-		// 	js, err := drv.JSONGetVal()
-		// 	if err != nil {
-		// 		fmt.Println(err.Error())
-		// 	} else {
-		// 		fmt.Println(js)
-		// 	}
-		// }
-		// for _, rout := range routers {
-		// 	js, err := rout.JSONGetVal()
-		// 	if err != nil {
-		// 		fmt.Println(err.Error())
-		// 	} else {
-		// 		fmt.Println(js)
-		// 	}
-
-		// }
-		time.Sleep(1 * time.Second)
+		time.Sleep(10 * time.Second)
+		for _, drv := range drivers {
+			js, err := drv.JSONGetVal()
+			if err != nil {
+				fmt.Println(err.Error())
+			} else {
+				fmt.Println(js)
+			}
+		}
+		for _, rout := range routers {
+			js, err := rout.JSONGetVal()
+			if err != nil {
+				fmt.Println(err.Error())
+			} else {
+				fmt.Println(js)
+			}
+		}
+		js, err := vars.GetInfoRouters(routers)
+		if err != nil {
+			fmt.Println(err.Error())
+		} else {
+			fmt.Println(js)
+		}
+		js, err = mdbus.GetInfoModbuses(drivers)
+		if err != nil {
+			fmt.Println(err.Error())
+		} else {
+			fmt.Println(js)
+		}
+		break
 	}
 	fmt.Println("Конец работы")
 }

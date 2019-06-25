@@ -24,6 +24,8 @@ type Router struct {
 	MaxID     int
 	LastOp    time.Time
 	mu        sync.Mutex
+	Connect   bool
+	Status    string
 }
 
 //XMLRet for respnoce
@@ -45,7 +47,8 @@ func Init(sub *project.Subsystem, sop project.Sub, ip string) (*Router, error) {
 	r.IP = ip
 	r.Port = 1080
 	r.Values = make(map[string][]string)
-	r.Variables = make(map[string]project.Variable)
+	// r.Variables = make(map[string]project.Variable)
+	r.Variables = sub.Variables
 	r.NumValue = make(map[int]string)
 	MaxID := 0
 	for _, vr := range sub.Variables {
@@ -67,6 +70,65 @@ func Init(sub *project.Subsystem, sop project.Sub, ip string) (*Router, error) {
 func (r *Router) Start() {
 	go r.run()
 }
+func (r *Router) readArrays() {
+	for _, name := range r.Arrays {
+		v, ok := r.Variables[name]
+		if !ok {
+			fmt.Println(r.Name, name, " not found")
+			return
+		}
+		conn, err := net.Dial("tcp4", r.IP+":"+strconv.Itoa(r.Port))
+		if err != nil {
+			r.Status = fmt.Sprintln(err.Error())
+			r.Connect = false
+			return
+		}
+		defer conn.Close()
+		var result bytes.Buffer
+		buffer := make([]byte, 130000)
+		str := "A" + strconv.Itoa(v.ID) + " " + v.Size + " \000"
+		_, err = conn.Write([]byte(str))
+		if err != nil {
+			fmt.Println(r.Name, err.Error())
+			return
+		}
+		loop := true
+		for loop {
+			lenr, err := conn.Read(buffer)
+			if err != nil {
+				if err.Error() != "EOF" {
+					fmt.Println(r.Name, err.Error())
+					return
+				}
+			}
+			if lenr == 0 {
+				break
+			}
+			for index := 0; index < lenr; index++ {
+				if buffer[index] == 0 {
+					loop = false
+				}
+			}
+			result.Write(buffer[:lenr])
+		}
+		conn.Close()
+		// st := result.String()
+		// fmt.Println(r.Name, v.Name, st)
+		res := strings.Split(result.String(), " ")
+		size, _ := strconv.Atoi(v.Size)
+		if len(res) != size {
+			//fmt.Println(r.Name, v.Name, " bad size ")
+			continue
+		}
+		r.mu.Lock()
+		r.Values[v.Name] = res
+		r.mu.Unlock()
+	}
+	if len(r.Arrays) > 0 {
+		r.Connect = true
+		r.Status = ""
+	}
+}
 func (r *Router) readVariables() {
 	loop := true
 	stp := 500
@@ -74,7 +136,8 @@ func (r *Router) readVariables() {
 	for loop {
 		conn, err := net.Dial("tcp4", r.IP+":"+strconv.Itoa(r.Port))
 		if err != nil {
-			fmt.Println(r.Name, err.Error())
+			r.Status = fmt.Sprintln(err.Error())
+			r.Connect = false
 			return
 		}
 		defer conn.Close()
@@ -84,7 +147,7 @@ func (r *Router) readVariables() {
 			loop = false
 		}
 		var result bytes.Buffer
-		buffer := make([]byte, 25500)
+		buffer := make([]byte, 130000)
 		str := "R" + strconv.Itoa(i) + " " + strconv.Itoa(j) + "\000"
 		_, err = conn.Write([]byte(str))
 		if err != nil {
@@ -95,7 +158,8 @@ func (r *Router) readVariables() {
 			lenr, err := conn.Read(buffer)
 			if err != nil {
 				if err.Error() != "EOF" {
-					fmt.Println(r.Name, err.Error())
+					r.Status = fmt.Sprintln(err.Error())
+					r.Connect = false
 					return
 				}
 			}
@@ -140,12 +204,14 @@ func (r *Router) readVariables() {
 		i += stp
 
 	}
+	r.Connect = true
+	r.Status = ""
 }
 func (r *Router) run() {
 	step := time.Duration(1000) * time.Millisecond
 	for {
 		r.readVariables()
-		// r.readArrays()
+		r.readArrays()
 		time.Sleep(step)
 	}
 }
