@@ -61,44 +61,65 @@ func main() {
 
 	}
 	fmt.Println("Modbuses.....")
+	flag := false
 	for _, drv := range drivers {
 		drv.Run()
+		if flag {
+			continue
+		}
 		js, err := drv.GetFullInfo()
 		if err != nil {
 			fmt.Println(err.Error())
 		} else {
 			fmt.Println(js)
+			flag = true
 		}
 	}
 	fmt.Println("Variables.....")
+	flag = false
 
 	for _, rout := range routers {
 		rout.Start()
+		if flag {
+			continue
+		}
 		js, err := rout.GetFullInfo()
 		if err != nil {
 			fmt.Println(err.Error())
 		} else {
 			fmt.Println(js)
+			flag = true
 		}
 	}
 	// for _, rout := range routers {
 	// }
 	for true {
 		time.Sleep(10 * time.Second)
+		flag = false
 		for _, drv := range drivers {
+			drv.Run()
+			if flag {
+				continue
+			}
 			js, err := drv.JSONGetVal()
 			if err != nil {
 				fmt.Println(err.Error())
 			} else {
 				fmt.Println(js)
+				flag = true
 			}
 		}
+		flag = false
 		for _, rout := range routers {
+			if flag {
+				continue
+			}
 			js, err := rout.JSONGetVal()
 			if err != nil {
 				fmt.Println(err.Error())
 			} else {
 				fmt.Println(js)
+				flag = true
 			}
 		}
 		js, err := vars.GetInfoRouters(routers)
