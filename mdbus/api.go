@@ -51,7 +51,7 @@ type Value struct {
 }
 
 //JSONGetVal return json all value modbus
-func (d *Driver) JSONGetVal() (string, error) {
+func (d *Driver) JSONGetVal() ([]byte, error) {
 	j := new(JValues)
 	j.Name = d.Name
 	coils := make([]bool, d.lenCoil)
@@ -88,12 +88,12 @@ func (d *Driver) JSONGetVal() (string, error) {
 		j.Values = append(j.Values, *val)
 	}
 	res, err := json.Marshal(j)
-	return string(res), err
+	return res, err
 
 }
 
 //GetFullInfo json all modbus info
-func (d *Driver) GetFullInfo() (string, error) {
+func (d *Driver) GetFullInfo() ([]byte, error) {
 	j := new(JFullInfo)
 	j.Name = d.Name
 	j.IP1 = d.IP
@@ -107,11 +107,11 @@ func (d *Driver) GetFullInfo() (string, error) {
 		j.Registers = append(j.Registers, *r)
 	}
 	res, err := json.Marshal(j)
-	return string(res), err
+	return res, err
 }
 
 //GetInfoModbuses return json define all modbuses
-func GetInfoModbuses(mbs map[string]*Driver) (string, error) {
+func GetInfoModbuses(mbs map[string]*Driver) ([]byte, error) {
 	j := new(JInfoModbuses)
 	j.Name = "modbuses"
 	for _, mb := range mbs {
@@ -125,7 +125,7 @@ func GetInfoModbuses(mbs map[string]*Driver) (string, error) {
 		j.Modbuses = append(j.Modbuses, *jm)
 	}
 	res, err := json.Marshal(j)
-	return string(res), err
+	return res, err
 }
 
 //GetNames возвращает имена переменных с типом переменной

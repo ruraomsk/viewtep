@@ -37,7 +37,7 @@ type JRout struct {
 }
 
 //JSONGetVal return json all value modbus
-func (r *Router) JSONGetVal() (string, error) {
+func (r *Router) JSONGetVal() ([]byte, error) {
 	j := new(JValues)
 	j.Name = r.Name
 	r.mu.Lock()
@@ -49,23 +49,23 @@ func (r *Router) JSONGetVal() (string, error) {
 	}
 	res, err := json.Marshal(j)
 	r.mu.Unlock()
-	return string(res), err
+	return res, err
 
 }
 
 //GetFullInfo json all modbus info
-func (r *Router) GetFullInfo() (string, error) {
+func (r *Router) GetFullInfo() ([]byte, error) {
 	j := new(JFullInfo)
 	j.Name = r.Name
 	for _, v := range r.Variables {
 		j.Vars = append(j.Vars, v)
 	}
 	res, err := json.Marshal(j)
-	return string(res), err
+	return res, err
 }
 
 //GetInfoRouters make json for all routers
-func GetInfoRouters(rs map[string]*Router) (string, error) {
+func GetInfoRouters(rs map[string]*Router) ([]byte, error) {
 	j := new(JFullRout)
 	j.Name = "routers"
 	for _, r := range rs {
@@ -76,5 +76,5 @@ func GetInfoRouters(rs map[string]*Router) (string, error) {
 		j.Routs = append(j.Routs, *jr)
 	}
 	res, err := json.Marshal(j)
-	return string(res), err
+	return res, err
 }
