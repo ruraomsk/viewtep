@@ -19,7 +19,7 @@ func respAllSubsystems(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("Запрос ", err.Error())
 		return
 	}
-	w.Write(res)
+	Sending(w, res)
 }
 func respSubsystemInfo(w http.ResponseWriter, r *http.Request) {
 	for _, rout := range routers {
@@ -28,8 +28,7 @@ func respSubsystemInfo(w http.ResponseWriter, r *http.Request) {
 			fmt.Println("Запрос ", err.Error())
 			return
 		}
-		w.Write(res)
-		w.Write([]byte("\n*****************************************\n"))
+		Sending(w, res)
 	}
 }
 func respSubsystemValue(w http.ResponseWriter, r *http.Request) {
@@ -39,8 +38,7 @@ func respSubsystemValue(w http.ResponseWriter, r *http.Request) {
 			fmt.Println("Запрос ", err.Error())
 			return
 		}
-		w.Write(res)
-		w.Write([]byte("\n*****************************************\n"))
+		Sending(w, res)
 	}
 }
 func respAllModbuses(w http.ResponseWriter, r *http.Request) {
@@ -49,7 +47,7 @@ func respAllModbuses(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("Запрос ", err.Error())
 		return
 	}
-	w.Write(res)
+	Sending(w, res)
 }
 func respModbusInfo(w http.ResponseWriter, r *http.Request) {
 
@@ -59,8 +57,7 @@ func respModbusInfo(w http.ResponseWriter, r *http.Request) {
 			fmt.Println("Запрос ", err.Error())
 			return
 		}
-		w.Write(res)
-		w.Write([]byte("\n*****************************************\n"))
+		Sending(w, res)
 	}
 }
 func respModbusValue(w http.ResponseWriter, r *http.Request) {
@@ -71,9 +68,15 @@ func respModbusValue(w http.ResponseWriter, r *http.Request) {
 			fmt.Println("Запрос ", err.Error())
 			return
 		}
-		w.Write(res)
-		w.Write([]byte("\n*****************************************\n"))
+		Sending(w, res)
 	}
+}
+
+//Sending send json to web
+func Sending(w http.ResponseWriter, res []byte) {
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Write(res)
 }
 func gui() {
 	http.HandleFunc("/", func(response http.ResponseWriter, request *http.Request) {
