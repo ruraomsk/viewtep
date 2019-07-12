@@ -22,24 +22,33 @@ func respAllSubsystems(w http.ResponseWriter, r *http.Request) {
 	Sending(w, res)
 }
 func respSubsystemInfo(w http.ResponseWriter, r *http.Request) {
-	for _, rout := range routers {
-		res, err := rout.GetFullInfo()
-		if err != nil {
-			fmt.Println("Запрос ", err.Error())
-			return
-		}
-		Sending(w, res)
+	name := r.URL.Query().Get("name")
+	rout, ok := routers[name]
+	if !ok {
+		fmt.Println("Запрос нет ", name)
+		return
+
 	}
+	res, err := rout.GetFullInfo()
+	if err != nil {
+		fmt.Println("Запрос ", err.Error())
+		return
+	}
+	Sending(w, res)
 }
 func respSubsystemValue(w http.ResponseWriter, r *http.Request) {
-	for _, rout := range routers {
-		res, err := rout.JSONGetVal()
-		if err != nil {
-			fmt.Println("Запрос ", err.Error())
-			return
-		}
-		Sending(w, res)
+	name := r.URL.Query().Get("name")
+	rout, ok := routers[name]
+	if !ok {
+		fmt.Println("Запрос нет ", name)
+		return
 	}
+	res, err := rout.JSONGetVal()
+	if err != nil {
+		fmt.Println("Запрос ", err.Error())
+		return
+	}
+	Sending(w, res)
 }
 func respAllModbuses(w http.ResponseWriter, r *http.Request) {
 	res, err := mdbus.GetInfoModbuses(drivers)
@@ -50,26 +59,36 @@ func respAllModbuses(w http.ResponseWriter, r *http.Request) {
 	Sending(w, res)
 }
 func respModbusInfo(w http.ResponseWriter, r *http.Request) {
+	name := r.URL.Query().Get("name")
+	drv, ok := drivers[name]
+	if !ok {
+		fmt.Println("Запрос нет ", name)
+		return
 
-	for _, drv := range drivers {
-		res, err := drv.GetFullInfo()
-		if err != nil {
-			fmt.Println("Запрос ", err.Error())
-			return
-		}
-		Sending(w, res)
 	}
+
+	res, err := drv.GetFullInfo()
+	if err != nil {
+		fmt.Println("Запрос ", err.Error())
+		return
+	}
+	Sending(w, res)
 }
 func respModbusValue(w http.ResponseWriter, r *http.Request) {
+	name := r.URL.Query().Get("name")
+	drv, ok := drivers[name]
+	if !ok {
+		fmt.Println("Запрос нет ", name)
+		return
 
-	for _, drv := range drivers {
-		res, err := drv.JSONGetVal()
-		if err != nil {
-			fmt.Println("Запрос ", err.Error())
-			return
-		}
-		Sending(w, res)
 	}
+
+	res, err := drv.JSONGetVal()
+	if err != nil {
+		fmt.Println("Запрос ", err.Error())
+		return
+	}
+	Sending(w, res)
 }
 
 //Sending send json to web
