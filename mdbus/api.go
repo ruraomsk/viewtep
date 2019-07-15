@@ -36,6 +36,8 @@ type Reg struct {
 	Type        int    `json:"type"`
 	Format      int    `json:"format"`
 	Description string `json:"desc"`
+	Address     int    `json:"address"`
+	Size        int    `json:"size"`
 }
 
 //JValues all value from ModBus
@@ -104,6 +106,8 @@ func (d *Driver) GetFullInfo() ([]byte, error) {
 		r.Description = reg.description
 		r.Format = reg.format
 		r.Type = reg.regtype
+		r.Size = reg.size
+		r.Address = reg.address
 		j.Registers = append(j.Registers, *r)
 	}
 	res, err := json.Marshal(j)

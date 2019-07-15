@@ -5,15 +5,24 @@ import (
 	"net/http"
 	"os"
 	"rura/codetep/project"
+	"rura/viewtep/autoriz"
 	"rura/viewtep/mdbus"
 	"rura/viewtep/vars"
+	"strings"
 	"time"
 )
 
 var drivers map[string]*mdbus.Driver
 var routers map[string]*vars.Router
+var users autoriz.Users
+var aprov map[string]bool
 
 func respAllSubsystems(w http.ResponseWriter, r *http.Request) {
+	if !isLogged(r) {
+		w.WriteHeader(http.StatusUnauthorized)
+		fmt.Println("Need login ", r.RemoteAddr)
+		return
+	}
 	res, err := vars.GetInfoRouters(routers)
 	if err != nil {
 		fmt.Println("Запрос ", err.Error())
@@ -22,14 +31,27 @@ func respAllSubsystems(w http.ResponseWriter, r *http.Request) {
 	Sending(w, res)
 }
 func respSubsystemInfo(w http.ResponseWriter, r *http.Request) {
+	if !isLogged(r) {
+		w.WriteHeader(http.StatusUnauthorized)
+		fmt.Println("Need login ", r.RemoteAddr)
+		return
+	}
 	name := r.URL.Query().Get("name")
-	rout, ok := routers[name]
+	rout := make([]*vars.Router, 0)
+	ok := false
+	for _, r := range routers {
+		n := strings.Split(r.Name, ":")
+		if n[0] == name {
+			rout = append(rout, r)
+			ok = true
+		}
+	}
 	if !ok {
 		fmt.Println("Запрос нет ", name)
 		return
 
 	}
-	res, err := rout.GetFullInfo()
+	res, err := vars.GetFullInfo(rout)
 	if err != nil {
 		fmt.Println("Запрос ", err.Error())
 		return
@@ -37,6 +59,11 @@ func respSubsystemInfo(w http.ResponseWriter, r *http.Request) {
 	Sending(w, res)
 }
 func respSubsystemValue(w http.ResponseWriter, r *http.Request) {
+	if !isLogged(r) {
+		w.WriteHeader(http.StatusUnauthorized)
+		fmt.Println("Need login ", r.RemoteAddr)
+		return
+	}
 	name := r.URL.Query().Get("name")
 	rout, ok := routers[name]
 	if !ok {
@@ -51,6 +78,11 @@ func respSubsystemValue(w http.ResponseWriter, r *http.Request) {
 	Sending(w, res)
 }
 func respAllModbuses(w http.ResponseWriter, r *http.Request) {
+	if !isLogged(r) {
+		w.WriteHeader(http.StatusUnauthorized)
+		fmt.Println("Need login ", r.RemoteAddr)
+		return
+	}
 	res, err := mdbus.GetInfoModbuses(drivers)
 	if err != nil {
 		fmt.Println("Запрос ", err.Error())
@@ -59,6 +91,11 @@ func respAllModbuses(w http.ResponseWriter, r *http.Request) {
 	Sending(w, res)
 }
 func respModbusInfo(w http.ResponseWriter, r *http.Request) {
+	if !isLogged(r) {
+		w.WriteHeader(http.StatusUnauthorized)
+		fmt.Println("Need login ", r.RemoteAddr)
+		return
+	}
 	name := r.URL.Query().Get("name")
 	drv, ok := drivers[name]
 	if !ok {
@@ -75,6 +112,11 @@ func respModbusInfo(w http.ResponseWriter, r *http.Request) {
 	Sending(w, res)
 }
 func respModbusValue(w http.ResponseWriter, r *http.Request) {
+	if !isLogged(r) {
+		w.WriteHeader(http.StatusUnauthorized)
+		fmt.Println("Need login ", r.RemoteAddr)
+		return
+	}
 	name := r.URL.Query().Get("name")
 	drv, ok := drivers[name]
 	if !ok {
@@ -97,10 +139,32 @@ func Sending(w http.ResponseWriter, res []byte) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Write(res)
 }
+func loginToSystem(w http.ResponseWriter, r *http.Request) {
+	login := r.URL.Query().Get("login")
+	password := r.URL.Query().Get("password")
+
+	if !users.ChekUser(login, password) {
+		w.WriteHeader(http.StatusUnauthorized)
+		fmt.Println("Login bad ", login, password)
+
+		return
+	}
+	ok, _ := aprov[r.RemoteAddr]
+	if !ok {
+		aprov[r.RemoteAddr] = true
+	}
+}
+func isLogged(r *http.Request) bool {
+	return true
+	// ok, _ := aprov[r.RemoteAddr]
+	// return ok
+}
 func gui() {
+	aprov = make(map[string]bool)
 	http.HandleFunc("/", func(response http.ResponseWriter, request *http.Request) {
 		http.ServeFile(response, request, "./index.html")
 	})
+	http.HandleFunc("/login", loginToSystem)
 	http.HandleFunc("/allSubs", respAllSubsystems)
 	http.HandleFunc("/allModbuses", respAllModbuses)
 	http.HandleFunc("/subinfo", respSubsystemInfo)
@@ -165,6 +229,10 @@ func main() {
 			}
 		}
 
+	}
+	users, err = autoriz.LoadUsers("users.xml")
+	if err != nil {
+		globalError = true
 	}
 	if globalError {
 		fmt.Println("Дальнейшая работа невозможна!")
