@@ -177,3 +177,13 @@ func (d *Driver) LastOp(chanel int) time.Time {
 	}
 	return d.tr2.lastop()
 }
+
+//WriteVariable write value to out
+func (d *Driver) WriteVariable(name string, value string) {
+	reg, ok := d.registers[name]
+	if !ok {
+		return
+	}
+	d.tr.writeVariable(reg, value)
+	d.tr2.writeVariable(reg, value)
+}

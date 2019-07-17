@@ -215,3 +215,26 @@ func (r *Router) run() {
 		time.Sleep(step)
 	}
 }
+
+//WriteVariable send value to subsystem
+func (r *Router) WriteVariable(name string, value string) {
+	v, ok := r.Variables[name]
+	if !ok {
+		fmt.Println("В", r.Name, "нет", name)
+		return
+	}
+
+	conn, err := net.Dial("tcp4", r.IP+":"+strconv.Itoa(r.Port))
+	if err != nil {
+		fmt.Println(err.Error())
+		return
+	}
+	defer conn.Close()
+	str := "W" + strconv.Itoa(v.ID) + " " + value + "\000"
+	_, err = conn.Write([]byte(str))
+	if err != nil {
+		fmt.Println(r.Name, err.Error())
+		return
+	}
+
+}

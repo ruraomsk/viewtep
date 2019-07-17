@@ -154,6 +154,40 @@ func loginToSystem(w http.ResponseWriter, r *http.Request) {
 		aprov[r.RemoteAddr] = true
 	}
 }
+func respSetModbusValue(w http.ResponseWriter, r *http.Request) {
+	if !isLogged(r) {
+		w.WriteHeader(http.StatusUnauthorized)
+		fmt.Println("Need login ", r.RemoteAddr)
+		return
+	}
+	mname := r.URL.Query().Get("modbus")
+	name := r.URL.Query().Get("name")
+	value := r.URL.Query().Get("value")
+	drv, ok := drivers[mname]
+	if !ok {
+		fmt.Println("Запрос нет ", mname, name, value)
+		return
+
+	}
+	drv.WriteVariable(name, value)
+}
+func respSetSubsystemValue(w http.ResponseWriter, r *http.Request) {
+	if !isLogged(r) {
+		w.WriteHeader(http.StatusUnauthorized)
+		fmt.Println("Need login ", r.RemoteAddr)
+		return
+	}
+	sname := r.URL.Query().Get("subsystem")
+	name := r.URL.Query().Get("name")
+	value := r.URL.Query().Get("value")
+
+	rout, ok := routers[sname]
+	if !ok {
+		fmt.Println("Запрос нет ", sname, name, value)
+		return
+	}
+	rout.WriteVariable(name, value)
+}
 func isLogged(r *http.Request) bool {
 	return true
 	// ok, _ := aprov[r.RemoteAddr]
@@ -171,6 +205,8 @@ func gui() {
 	http.HandleFunc("/modinfo", respModbusInfo)
 	http.HandleFunc("/subvalue", respSubsystemValue)
 	http.HandleFunc("/modvalue", respModbusValue)
+	http.HandleFunc("/setsubval", respSetSubsystemValue)
+	http.HandleFunc("/setmodval", respSetModbusValue)
 	fmt.Println("Listering on port 8080")
 	http.ListenAndServe(":8080", nil)
 }
