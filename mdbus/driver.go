@@ -48,8 +48,8 @@ func Init(name string, dev project.Modbus, sub project.Sub) (*Driver, error) {
 	driver := new(Driver)
 	driver.Name = name
 	driver.Description = dev.Description
-	// driver.Step = 1000
-	// driver.Restart = 10000
+	driver.Step = 500
+	driver.Restart = 10000
 	driver.IP = sub.Main
 	driver.IP2 = sub.Second
 	driver.Port, _ = strconv.Atoi(dev.Port)

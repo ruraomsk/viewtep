@@ -208,7 +208,10 @@ func gui() {
 	http.HandleFunc("/setsubval", respSetSubsystemValue)
 	http.HandleFunc("/setmodval", respSetModbusValue)
 	fmt.Println("Listering on port 8080")
-	http.ListenAndServe(":8080", nil)
+	err := http.ListenAndServe(":8080", nil)
+	if err != nil {
+		panic(err.Error())
+	}
 }
 func main() {
 
@@ -283,6 +286,7 @@ func main() {
 	go gui()
 	for true {
 		time.Sleep(10 * time.Second)
+		// fmt.Print(".")
 	}
 	fmt.Println("Конец работы")
 }
