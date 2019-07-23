@@ -195,9 +195,11 @@ func isLogged(r *http.Request) bool {
 }
 func gui() {
 	aprov = make(map[string]bool)
-	http.HandleFunc("/", func(response http.ResponseWriter, request *http.Request) {
-		http.ServeFile(response, request, "./index.html")
-	})
+	// http.HandleFunc("/", func(response http.ResponseWriter, request *http.Request) {
+	// 	http.ServeFile(response, request, "./frontend/index.html")
+	// })
+
+	http.Handle("/", http.FileServer(http.Dir("./frontend")))
 	http.HandleFunc("/login", loginToSystem)
 	http.HandleFunc("/allSubs", respAllSubsystems)
 	http.HandleFunc("/allModbuses", respAllModbuses)
