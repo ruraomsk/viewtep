@@ -114,10 +114,11 @@ func (r *Router) readArrays() {
 		conn.Close()
 		// st := result.String()
 		// fmt.Println(r.Name, v.Name, st)
-		res := strings.Split(result.String(), " ")
+		res := strings.Split(strings.TrimRight(strings.TrimLeft(result.String(), " "), " "), " ")
 		size, _ := strconv.Atoi(v.Size)
 		if len(res) != size {
-			//fmt.Println(r.Name, v.Name, " bad size ")
+			// fmt.Println(r.Name, v.Name, len(res), size, " bad size ")
+			// fmt.Println(res)
 			continue
 		}
 		r.mu.Lock()
