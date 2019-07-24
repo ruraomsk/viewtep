@@ -365,16 +365,19 @@ function updateContent() {
 
 function setRemoteValue(spanId, oldValue) {
     var newValue = prompt("Enter new value: ", oldValue);
-    var url = ( currentModbus.length > 0 ) ? urlSetModbusValue: urlSetSubsystemValue;
-    var data=( currentModbus.length > 0 ) ? 'modbus='+currentModbus+"&name="+spanId : 'subsystem='+spanId;
-    data += "&value=" + newValue;
-    $.ajax({
-        url: url,
-        data: data,
-        success: function() {
-            alert('Value updated!');
-        }
-    });
+
+    if (newValue != null) {
+        var url = ( currentModbus.length > 0 ) ? urlSetModbusValue: urlSetSubsystemValue;
+        var data=( currentModbus.length > 0 ) ? 'modbus='+currentModbus+"&name="+spanId : 'subsystem='+spanId;
+        data += "&value=" + newValue;
+        $.ajax({
+            url: url,
+            data: data,
+            success: function() {
+                alert('Value updated!');
+            }
+        });
+    }
 }
 
 $(document).ready(function(){
@@ -453,8 +456,7 @@ $(document).ready(function(){
         }
     });
 
-    $(document).on('dblclick', '.editable', function() {
+    $(document).on('click', '.editable', function() {
         setRemoteValue(this.id, this.innerHTML);        
     });
 });
-
