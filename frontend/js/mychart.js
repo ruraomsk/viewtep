@@ -2,10 +2,7 @@
 var periodChartUpdating = 1000;
 
 var myChart;
-var dataChart = [];
-
 var isPause = false;
-
 var chartData;
 
 
@@ -102,6 +99,16 @@ var chartColors = [
     'rgb(201, 203, 207)'
 ];
 
+function showTitle() {
+    var title = "";
+    for (var i=0; i < chartData.data.length; i++ ) {
+        if (title.length > 0) {
+            title += ", ";
+        }
+        title += chartData.data[i]['value'];
+    }
+    $('title').html(title);
+}
 
 function showChart() {
     var ctx = document.getElementById('myChart')
@@ -127,6 +134,8 @@ $(document).ready(function(){
     const data = urlParams.get('data');
     chartData = JSON.parse(data);
 
+    showTitle();
+
     showChart();
     startChartUpdating();
     isPause = false;
@@ -135,7 +144,6 @@ $(document).ready(function(){
         if ( !isPause ) {
             stopChartUpdating();
             $(this).addClass('active');
-
             isPause = true;
         }
         else {
@@ -143,6 +151,5 @@ $(document).ready(function(){
             isPause = false;
             $(this).removeClass('active');
         }
-
     });
 });
