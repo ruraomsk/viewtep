@@ -4,6 +4,11 @@ var periodChartUpdating = 1000;
 var myChart;
 var dataChart = [];
 
+var isPause = false;
+
+var chartData;
+
+
 var configChart = {
     type: 'line',
     data: {
@@ -117,16 +122,27 @@ function showChart() {
     myChart.update();
 }
 
-var chartData;
-
-
 $(document).ready(function(){
     const urlParams = new URLSearchParams(window.location.search);
     const data = urlParams.get('data');
     chartData = JSON.parse(data);
 
-    $("#content").html("Length: "+chartData.data.length +"<br>" + data);
-
     showChart();
     startChartUpdating();
+    isPause = false;
+
+    $('#btn-pause').click(function() {
+        if ( !isPause ) {
+            stopChartUpdating();
+            $(this).addClass('active');
+
+            isPause = true;
+        }
+        else {
+            startChartUpdating();
+            isPause = false;
+            $(this).removeClass('active');
+        }
+
+    });
 });
