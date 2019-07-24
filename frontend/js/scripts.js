@@ -372,10 +372,7 @@ function setRemoteValue(spanId, oldValue) {
         data += "&value=" + newValue;
         $.ajax({
             url: url,
-            data: data,
-            success: function() {
-                alert('Value updated!');
-            }
+            data: data
         });
     }
 }
