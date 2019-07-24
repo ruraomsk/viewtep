@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"runtime"
 	"rura/codetep/project"
 	"rura/viewtep/autoriz"
 	"rura/viewtep/mdbus"
@@ -220,7 +221,11 @@ func main() {
 	fmt.Println("Начало работы...")
 	prPath := ""
 	if len(os.Args) == 1 {
-		prPath = "/home/rura/dataSimul/pr"
+		if runtime.GOOS == "linux" {
+			prPath = "/home/rura/dataSimul/pr"
+		} else {
+			prPath = "d:/combo/data/pr"
+		}
 	} else {
 		prPath = os.Args[1]
 	}

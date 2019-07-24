@@ -1,13 +1,13 @@
-var urlSubs = 'http://192.168.1.44:8080/allSubs';
-var urlCurrentSubsystem = 'http://192.168.1.44:8080/subinfo?name=';
-var urlValuesSubsystem = 'http://192.168.1.44:8080/subvalue?name=';
+var urlSubs = 'http://192.168.10.30:8080/allSubs';
+var urlCurrentSubsystem = 'http://192.168.10.30:8080/subinfo?name=';
+var urlValuesSubsystem = 'http://192.168.10.30:8080/subvalue?name=';
 
-var urlModbuses = 'http://192.168.1.44:8080/allModbuses';
-var urlCurrentModbus='http://192.168.1.44:8080/modinfo?name=';
-var urlValuesModbus = 'http://192.168.1.44:8080/modvalue?name=';
+var urlModbuses = 'http://192.168.10.30:8080/allModbuses';
+var urlCurrentModbus='http://192.168.10.30:8080/modinfo?name=';
+var urlValuesModbus = 'http://192.168.1.30:8080/modvalue?name=';
 
-var urlSetSubsystemValue = 'http://192.168.1.44:8080/setsubval';
-var urlSetModbusValue = 'http://192.168.1.44:8080/setmodval';
+var urlSetSubsystemValue = 'http://192.168.10.30:8080/setsubval';
+var urlSetModbusValue = 'http://192.168.10.30:8080/setmodval';
 
 var subsystems = [];
 var modbuses = [];
