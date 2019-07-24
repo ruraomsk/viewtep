@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"runtime"
 	"rura/codetep/project"
 	"rura/viewtep/autoriz"
 	"rura/viewtep/mdbus"
@@ -195,9 +196,11 @@ func isLogged(r *http.Request) bool {
 }
 func gui() {
 	aprov = make(map[string]bool)
-	http.HandleFunc("/", func(response http.ResponseWriter, request *http.Request) {
-		http.ServeFile(response, request, "./index.html")
-	})
+	// http.HandleFunc("/", func(response http.ResponseWriter, request *http.Request) {
+	// 	http.ServeFile(response, request, "./frontend/index.html")
+	// })
+
+	http.Handle("/", http.FileServer(http.Dir("./frontend")))
 	http.HandleFunc("/login", loginToSystem)
 	http.HandleFunc("/allSubs", respAllSubsystems)
 	http.HandleFunc("/allModbuses", respAllModbuses)
@@ -218,7 +221,11 @@ func main() {
 	fmt.Println("Начало работы...")
 	prPath := ""
 	if len(os.Args) == 1 {
-		prPath = "/home/rura/dataSimul/pr"
+		if runtime.GOOS == "linux" {
+			prPath = "/home/rura/dataSimul/pr"
+		} else {
+			prPath = "d:/combo/data/pr"
+		}
 	} else {
 		prPath = os.Args[1]
 	}
