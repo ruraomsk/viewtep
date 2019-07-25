@@ -43,13 +43,17 @@ function setTitle(name) {
 
 function isContentFilter(str) {
     if ( contentFilter.length > 0  ) {
-        lowerStr = str.toLowerCase();
-        if ( lowerStr.indexOf( contentFilter.toLowerCase() ) >= 0) {
-            return true;
+        var sample = str.toLowerCase();
+        var filter = contentFilter.toLowerCase();
+
+        var subfilter = filter.split(';');
+
+        for (var i=0; i < subfilter.length; i++) {
+            if ( sample.indexOf( subfilter[i] ) >= 0) {
+                return true;
+            }
         }
-        else {
-            return false;
-        }
+        return false;
     }
     return true;
 }
