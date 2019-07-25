@@ -4,7 +4,7 @@ var urlValuesSubsystem = 'http://192.168.10.30:8080/subvalue?name=';
 
 var urlModbuses = 'http://192.168.10.30:8080/allModbuses';
 var urlCurrentModbus='http://192.168.10.30:8080/modinfo?name=';
-var urlValuesModbus = 'http://192.168.1.30:8080/modvalue?name=';
+var urlValuesModbus = 'http://192.168.10.30:8080/modvalue?name=';
 
 var urlSetSubsystemValue = 'http://192.168.10.30:8080/setsubval';
 var urlSetModbusValue = 'http://192.168.10.30:8080/setmodval';
@@ -56,8 +56,10 @@ function isSelected(variableName) {
     if ( selectedItems.length == 0 ) {
         return true;
     }
+
+    var sample = 'select_' + variableName;
     for (var i=0; i < selectedItems.length; i++) {
-        if ( selectedItems[i].toLowerCase() === variableName.toLowerCase() ) {
+        if ( selectedItems[i].toLowerCase() === sample.toLowerCase() ) {
             return true;
         }
     }
@@ -128,7 +130,6 @@ function clickToCheckbox(checkbox) {
 }
 
 function startChart() {
-    console.log(chartData);
     if (chartData.length == 0) {
         alert("Данные для построения графика не выбраны");
         return;
@@ -159,7 +160,7 @@ function addTableHeadForSubsystems(ips) {
 
 function getRowVariable(row, nameSubsystem) {
     var result = "<tr>";
-    result += "<td><input type='checkbox' class='"+classSelectVariable+"' id='"+row['name']+"'";
+    result += "<td><input type='checkbox' class='"+classSelectVariable+"' id='select_"+row['name']+"'";
     if ( isSelected(row['name']) && selectedItems.length > 0 ) {
         result += " checked";
     }
@@ -177,7 +178,7 @@ function getRowVariable(row, nameSubsystem) {
 
 function getRowRegister(row) {
     var result = "<tr>";
-    result += "<td><input type='checkbox' class='"+classSelectVariable+"' id='"+row['name']+"'";
+    result += "<td><input type='checkbox' class='"+classSelectVariable+"' id='select_"+row['name']+"'";
 
     if ( isSelected(row['name']) && selectedItems.length > 0 ) {
         result += " checked";
@@ -194,7 +195,7 @@ function getRowRegister(row) {
             result += "<td>DI (ReadOnly)</td>";
             break;
         case Register_IP:
-            result += "<td>IP (ReadOnly)</td>";
+            result += "<td>IR (ReadOnly)</td>";
             break;
         case Register_HR:
             result += "<td>HR</td>";
@@ -210,7 +211,7 @@ function getRowRegister(row) {
     if ( row['type'] == Register_COIL || row['type'] == Register_HR) {
         result += " class='editable'";
     }
-    result += "> </span>";
+    result += "></span>";
 
 
     result += "</td>";
@@ -255,7 +256,6 @@ function getCurrentModbus(name) {
     addTableHeadForModbuses();
     clearAllCheckboxes();
     currentModbus = name;
-
     $.getJSON( urlCurrentModbus+name, function(data) {
         var items = [];
         $.each( data.registers, function( ) {

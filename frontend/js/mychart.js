@@ -3,7 +3,7 @@ var periodChartUpdating = 1000;
 
 var myChart;
 var isPause = false;
-var chartData;
+var chartViewData;
 
 
 var configChart = {
@@ -39,9 +39,9 @@ function getValue(input) {
 }
 
 function showValue(indx) {
-    $.getJSON( chartData.url + chartData.data[indx]['name'], function(data){
+    $.getJSON( chartViewData.url + chartViewData.data[indx]['name'], function(data){
         for ( var j=0; j < data['values'].length; j++  ) {
-            if (data['values'][j]['name'] == chartData.data[indx]['value'] ) {
+            if (data['values'][j]['name'] == chartViewData.data[indx]['value'] ) {
                 var inputValue = getValue(data['values'][j]['value']);
                 var currentValue;
                 if ( inputValue === 'false') { currentValue =0;}
@@ -101,11 +101,11 @@ var chartColors = [
 
 function showTitle() {
     var title = "";
-    for (var i=0; i < chartData.data.length; i++ ) {
+    for (var i=0; i < chartViewData.data.length; i++ ) {
         if (title.length > 0) {
             title += ", ";
         }
-        title += chartData.data[i]['value'];
+        title += chartViewData.data[i]['value'];
     }
     $('title').html(title);
 }
@@ -114,10 +114,10 @@ function showChart() {
     var ctx = document.getElementById('myChart')
     myChart = new Chart(ctx, configChart);
 
-    for (var i=0; i < chartData.data.length; i++ ) {
+    for (var i=0; i < chartViewData.data.length; i++ ) {
 		var newColor = chartColors[i];
         var ds = {
-            label: chartData.data[i]['name'] + ":" + chartData.data[i]['value'],
+            label: chartViewData.data[i]['name'] + ":" + chartViewData.data[i]['value'],
             lineTension: 0,
             backgroundColor: newColor,
             borderColor: newColor,
@@ -132,7 +132,7 @@ function showChart() {
 $(document).ready(function(){
     const urlParams = new URLSearchParams(window.location.search);
     const data = urlParams.get('data');
-    chartData = JSON.parse(data);
+    chartViewData = JSON.parse(data);
 
     showTitle();
 
