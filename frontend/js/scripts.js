@@ -1,13 +1,22 @@
-var urlSubs = 'http://192.168.10.30:8080/allSubs';
-var urlCurrentSubsystem = 'http://192.168.10.30:8080/subinfo?name=';
-var urlValuesSubsystem = 'http://192.168.10.30:8080/subvalue?name=';
+const URL_SERVER = 'http://192.168.10.30:8080';
 
-var urlModbuses = 'http://192.168.10.30:8080/allModbuses';
-var urlCurrentModbus='http://192.168.10.30:8080/modinfo?name=';
-var urlValuesModbus = 'http://192.168.10.30:8080/modvalue?name=';
+const Register_COIL = 0;
+const Register_DI = 1;
+const Register_IR = 2;
+const Register_HR = 3;
 
-var urlSetSubsystemValue = 'http://192.168.10.30:8080/setsubval';
-var urlSetModbusValue = 'http://192.168.10.30:8080/setmodval';
+const classSelectVariable = 'select-variable';
+
+var urlSubs = URL_SERVER+'/allSubs';
+var urlCurrentSubsystem = URL_SERVER+'/subinfo?name=';
+var urlValuesSubsystem = URL_SERVER+'/subvalue?name=';
+
+var urlModbuses = URL_SERVER+'/allModbuses';
+var urlCurrentModbus= URL_SERVER+'/modinfo?name=';
+var urlValuesModbus = URL_SERVER+'/modvalue?name=';
+
+var urlSetSubsystemValue = URL_SERVER+'/setsubval';
+var urlSetModbusValue = URL_SERVER+'/setmodval';
 
 var subsystems = [];
 var modbuses = [];
@@ -26,13 +35,6 @@ var selectedItems = [];
 var isSelectedActive = false;
 
 var chartData = [];
-
-const Register_COIL = 0;
-const Register_DI = 1;
-const Register_IP = 2;
-const Register_HR = 3;
-
-const classSelectVariable = 'select-variable';
 
 function setTitle(name) {
     $('title').html(name);
@@ -78,7 +80,6 @@ function isShowSelected(nameVariable) {
     else {
         return true;
     }
-
 }
 
 function clearCheckboxesById(id) {
@@ -125,8 +126,6 @@ function clickToCheckbox(checkbox) {
                 }
              }
     }
-
-    console.log( chartData );
 }
 
 function startChart() {
@@ -194,7 +193,7 @@ function getRowRegister(row) {
         case Register_DI:
             result += "<td>DI (ReadOnly)</td>";
             break;
-        case Register_IP:
+        case Register_IR:
             result += "<td>IR (ReadOnly)</td>";
             break;
         case Register_HR:
@@ -211,10 +210,7 @@ function getRowRegister(row) {
     if ( row['type'] == Register_COIL || row['type'] == Register_HR) {
         result += " class='editable'";
     }
-    result += "></span>";
-
-
-    result += "</td>";
+    result += "></span></td>";
     result += "</tr>";
     return result;
 }
