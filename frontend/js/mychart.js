@@ -5,7 +5,6 @@ var myChart;
 var isPause = false;
 var chartViewData;
 
-
 var configChart = {
     type: 'line',
     data: {
@@ -23,6 +22,14 @@ var configChart = {
         }
     }
 };
+
+function getCurrentTime() {
+    var today = new Date();
+    var seconds = today.getSeconds();
+    seconds = (seconds < 10 ? '0' : '') + seconds;
+    var result = today.getMinutes() + ":" +  seconds;
+    return result;
+}
 
 function getValue(input) {
     if ( Array.isArray(input) ) {
@@ -57,7 +64,7 @@ function showValue(indx) {
 }
 
 function chartUpdating() {
-    configChart.data.labels.push(' ');
+    configChart.data.labels.push(getCurrentTime());
     for ( var i=0; i < configChart.data.datasets.length; i++) {
         showValue(i);
     }
