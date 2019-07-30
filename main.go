@@ -229,7 +229,7 @@ func main() {
 	} else {
 		prPath = os.Args[1]
 	}
-	fmt.Println("Проект загружается из ", prPath)
+	fmt.Println("Проект загружается из - ", prPath)
 	pr, err := project.LoadProject(prPath)
 	if err != nil {
 		fmt.Println("Найдены ошибки " + err.Error())
