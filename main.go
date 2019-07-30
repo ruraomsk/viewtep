@@ -222,7 +222,7 @@ func main() {
 	prPath := ""
 	if len(os.Args) == 1 {
 		if runtime.GOOS == "linux" {
-			prPath = "/home/rura/dataSimul/pr"
+			prPath = "/home/rura/combo/data/pr"
 		} else {
 			prPath = "d:/combo/data/pr"
 		}
