@@ -1,13 +1,22 @@
-var urlSubs = 'http://192.168.10.30:8080/allSubs';
-var urlCurrentSubsystem = 'http://192.168.10.30:8080/subinfo?name=';
-var urlValuesSubsystem = 'http://192.168.10.30:8080/subvalue?name=';
+const URL_SERVER = 'http://192.168.10.30:8080';
 
-var urlModbuses = 'http://192.168.10.30:8080/allModbuses';
-var urlCurrentModbus='http://192.168.10.30:8080/modinfo?name=';
-var urlValuesModbus = 'http://192.168.1.30:8080/modvalue?name=';
+const Register_COIL = 0;
+const Register_DI = 1;
+const Register_IR = 2;
+const Register_HR = 3;
 
-var urlSetSubsystemValue = 'http://192.168.10.30:8080/setsubval';
-var urlSetModbusValue = 'http://192.168.10.30:8080/setmodval';
+const classSelectVariable = 'select-variable';
+
+var urlSubs = URL_SERVER+'/allSubs';
+var urlCurrentSubsystem = URL_SERVER+'/subinfo?name=';
+var urlValuesSubsystem = URL_SERVER+'/subvalue?name=';
+
+var urlModbuses = URL_SERVER+'/allModbuses';
+var urlCurrentModbus= URL_SERVER+'/modinfo?name=';
+var urlValuesModbus = URL_SERVER+'/modvalue?name=';
+
+var urlSetSubsystemValue = URL_SERVER+'/setsubval';
+var urlSetModbusValue = URL_SERVER+'/setmodval';
 
 var subsystems = [];
 var modbuses = [];
@@ -27,13 +36,6 @@ var isSelectedActive = false;
 
 var chartData = [];
 
-const Register_COIL = 0;
-const Register_DI = 1;
-const Register_IP = 2;
-const Register_HR = 3;
-
-const classSelectVariable = 'select-variable';
-
 function setTitle(name) {
     $('title').html(name);
     $('#title').html(name);
@@ -41,13 +43,17 @@ function setTitle(name) {
 
 function isContentFilter(str) {
     if ( contentFilter.length > 0  ) {
-        lowerStr = str.toLowerCase();
-        if ( lowerStr.indexOf( contentFilter.toLowerCase() ) >= 0) {
-            return true;
+        var sample = str.toLowerCase();
+        var filter = contentFilter.toLowerCase();
+
+        var subfilter = filter.split(';');
+
+        for (var i=0; i < subfilter.length; i++) {
+            if ( sample.indexOf( subfilter[i] ) >= 0) {
+                return true;
+            }
         }
-        else {
-            return false;
-        }
+        return false;
     }
     return true;
 }
@@ -56,8 +62,10 @@ function isSelected(variableName) {
     if ( selectedItems.length == 0 ) {
         return true;
     }
+
+    var sample = 'select_' + variableName;
     for (var i=0; i < selectedItems.length; i++) {
-        if ( selectedItems[i].toLowerCase() === variableName.toLowerCase() ) {
+        if ( selectedItems[i].toLowerCase() === sample.toLowerCase() ) {
             return true;
         }
     }
@@ -76,7 +84,6 @@ function isShowSelected(nameVariable) {
     else {
         return true;
     }
-
 }
 
 function clearCheckboxesById(id) {
@@ -123,12 +130,9 @@ function clickToCheckbox(checkbox) {
                 }
              }
     }
-
-    console.log( chartData );
 }
 
 function startChart() {
-    console.log(chartData);
     if (chartData.length == 0) {
         alert("Данные для построения графика не выбраны");
         return;
@@ -159,7 +163,7 @@ function addTableHeadForSubsystems(ips) {
 
 function getRowVariable(row, nameSubsystem) {
     var result = "<tr>";
-    result += "<td><input type='checkbox' class='"+classSelectVariable+"' id='"+row['name']+"'";
+    result += "<td><input type='checkbox' class='"+classSelectVariable+"' id='select_"+row['name']+"'";
     if ( isSelected(row['name']) && selectedItems.length > 0 ) {
         result += " checked";
     }
@@ -177,7 +181,7 @@ function getRowVariable(row, nameSubsystem) {
 
 function getRowRegister(row) {
     var result = "<tr>";
-    result += "<td><input type='checkbox' class='"+classSelectVariable+"' id='"+row['name']+"'";
+    result += "<td><input type='checkbox' class='"+classSelectVariable+"' id='select_"+row['name']+"'";
 
     if ( isSelected(row['name']) && selectedItems.length > 0 ) {
         result += " checked";
@@ -193,8 +197,8 @@ function getRowRegister(row) {
         case Register_DI:
             result += "<td>DI (ReadOnly)</td>";
             break;
-        case Register_IP:
-            result += "<td>IP (ReadOnly)</td>";
+        case Register_IR:
+            result += "<td>IR (ReadOnly)</td>";
             break;
         case Register_HR:
             result += "<td>HR</td>";
@@ -210,10 +214,7 @@ function getRowRegister(row) {
     if ( row['type'] == Register_COIL || row['type'] == Register_HR) {
         result += " class='editable'";
     }
-    result += "> </span>";
-
-
-    result += "</td>";
+    result += "></span></td>";
     result += "</tr>";
     return result;
 }
@@ -255,7 +256,6 @@ function getCurrentModbus(name) {
     addTableHeadForModbuses();
     clearAllCheckboxes();
     currentModbus = name;
-
     $.getJSON( urlCurrentModbus+name, function(data) {
         var items = [];
         $.each( data.registers, function( ) {
@@ -365,16 +365,16 @@ function updateContent() {
 
 function setRemoteValue(spanId, oldValue) {
     var newValue = prompt("Enter new value: ", oldValue);
-    var url = ( currentModbus.length > 0 ) ? urlSetModbusValue: urlSetSubsystemValue;
-    var data=( currentModbus.length > 0 ) ? 'modbus='+currentModbus+"&name="+spanId : 'subsystem='+spanId;
-    data += "&value=" + newValue;
-    $.ajax({
-        url: url,
-        data: data,
-        success: function() {
-            alert('Value updated!');
-        }
-    });
+
+    if (newValue != null) {
+        var url = ( currentModbus.length > 0 ) ? urlSetModbusValue: urlSetSubsystemValue;
+        var data=( currentModbus.length > 0 ) ? 'modbus='+currentModbus+"&name="+spanId : 'subsystem='+spanId;
+        data += "&value=" + newValue;
+        $.ajax({
+            url: url,
+            data: data
+        });
+    }
 }
 
 $(document).ready(function(){
@@ -453,8 +453,7 @@ $(document).ready(function(){
         }
     });
 
-    $(document).on('dblclick', '.editable', function() {
+    $(document).on('click', '.editable', function() {
         setRemoteValue(this.id, this.innerHTML);        
     });
 });
-
