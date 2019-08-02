@@ -2,8 +2,8 @@ package autoriz
 
 import (
 	"encoding/xml"
-	"fmt"
 	"io/ioutil"
+	"rura/teprol/logger"
 )
 
 //Users list all users
@@ -24,7 +24,7 @@ func LoadUsers(path string) (Users, error) {
 	var us Users
 	buf, err := ioutil.ReadFile(path)
 	if err != nil {
-		fmt.Println("Error! " + err.Error())
+		logger.Error.Println("Error! " + err.Error())
 		return us, err
 	}
 	err = xml.Unmarshal(buf, &us)

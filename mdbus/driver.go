@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"rura/codetep/project"
+	"rura/teprol/logger"
 	"strconv"
 	"time"
 )
@@ -76,14 +77,14 @@ func Init(name string, dev project.Modbus, sub project.Sub) (*Driver, error) {
 	con := fmt.Sprintf("%s:%s", driver.IP, dev.Port)
 	d, err := master(driver, con)
 	if err != nil {
-		fmt.Println(err.Error())
+		logger.Error.Println(err.Error())
 		return driver, err
 	}
 	driver.tr = d
 	con = fmt.Sprintf("%s:%s", driver.IP2, dev.Port)
 	d, err = master(driver, con)
 	if err != nil {
-		fmt.Println(err.Error())
+		logger.Error.Println(err.Error())
 		return driver, err
 	}
 	driver.tr2 = d
@@ -111,7 +112,7 @@ func (d *Driver) loop() {
 			dv, err := master(d, con)
 			d.tr.unlock()
 			if err != nil {
-				fmt.Println(err.Error())
+				logger.Error.Println(err.Error())
 			} else {
 				d.tr = dv
 				dv.start()
@@ -125,7 +126,7 @@ func (d *Driver) loop() {
 			dv, err := master(d, con)
 			d.tr2.unlock()
 			if err != nil {
-				fmt.Println(err.Error())
+				logger.Error.Println(err.Error())
 			} else {
 				d.tr2 = dv
 				dv.start()

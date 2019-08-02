@@ -1,7 +1,7 @@
 package mdbus
 
 import (
-	"fmt"
+	"rura/teprol/logger"
 	"sync"
 	"time"
 
@@ -51,7 +51,7 @@ func (m *Master) worked() bool {
 func (m *Master) start() {
 	err := m.master.Connect()
 	if err != nil {
-		fmt.Println(m.name + " start " + err.Error())
+		logger.Info.Println(m.name + " start " + err.Error())
 		return
 	}
 	m.client = modbus.NewClient(m.master)
@@ -75,7 +75,7 @@ func (m *Master) readAllCoils() {
 	}
 	buff, err := m.client.ReadCoils(0, coils)
 	if err != nil {
-		fmt.Println(m.name + " coils " + err.Error())
+		logger.Error.Println(m.name + " coils " + err.Error())
 		m.stop()
 		return
 	}
@@ -95,7 +95,7 @@ func (m *Master) readAllDI() {
 	}
 	buff, err := m.client.ReadDiscreteInputs(0, di)
 	if err != nil {
-		fmt.Println(m.name + " di " + err.Error())
+		logger.Error.Println(m.name + " di " + err.Error())
 		m.stop()
 		return
 	}
@@ -120,7 +120,7 @@ func (m *Master) readAllIR() {
 		}
 		buff, err := m.client.ReadInputRegisters(ref, uint16(len))
 		if err != nil {
-			fmt.Println(m.name + " ir " + err.Error())
+			logger.Error.Println(m.name + " ir " + err.Error())
 			m.stop()
 			return
 		}
@@ -151,7 +151,7 @@ func (m *Master) readAllHR() {
 		}
 		buff, err := m.client.ReadHoldingRegisters(ref, uint16(len))
 		if err != nil {
-			fmt.Println(m.name + " hr " + err.Error())
+			logger.Error.Println(m.name + " hr " + err.Error())
 			m.stop()
 			return
 		}
@@ -243,7 +243,7 @@ func (m *Master) writeVariable(reg *Register, value string) (err error) {
 		pos += 2
 	}
 	if len(buffer) == 0 {
-		fmt.Printf("Длина буфера нулевая [%s]\n", value)
+		logger.Error.Printf("Длина буфера нулевая [%s]\n", value)
 		return
 	}
 	// println("]")
