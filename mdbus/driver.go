@@ -50,7 +50,7 @@ func Init(name string, dev project.Modbus, sub project.Sub) (*Driver, error) {
 	driver.Name = name
 	driver.Description = dev.Description
 	driver.Step = 500
-	driver.Restart = 10000
+	driver.Restart = 5
 	driver.IP = sub.Main
 	driver.IP2 = sub.Second
 	driver.Port, _ = strconv.Atoi(dev.Port)
@@ -94,7 +94,7 @@ func Init(name string, dev project.Modbus, sub project.Sub) (*Driver, error) {
 
 func (d *Driver) loop() {
 
-	step := 60 * time.Second
+	step := 10 * time.Second
 	if d.Restart != 0 {
 		step = time.Duration(d.Restart) * time.Second
 	}
