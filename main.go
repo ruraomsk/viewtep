@@ -66,7 +66,7 @@ func respSubsystemValue(w http.ResponseWriter, r *http.Request) {
 		logger.Error.Println("Need login ", r.RemoteAddr)
 		return
 	}
-	start := time.Now()
+	// start := time.Now()
 	name := r.URL.Query().Get("name")
 	rout, ok := routers[name]
 	if !ok {
@@ -78,10 +78,10 @@ func respSubsystemValue(w http.ResponseWriter, r *http.Request) {
 		logger.Error.Println("Запрос ", err.Error())
 		return
 	}
-	end := time.Now()
+	// end := time.Now()
 	Sending(w, res)
-	fullend := time.Now()
-	logger.Info.Println("respSubsystemValue work ", name, " ", end.Sub(start), " ", fullend.Sub(start))
+	// fullend := time.Now()
+	// logger.Info.Println("respSubsystemValue work ", name, " ", end.Sub(start), " ", fullend.Sub(start))
 
 }
 func respAllModbuses(w http.ResponseWriter, r *http.Request) {
