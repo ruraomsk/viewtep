@@ -241,6 +241,12 @@ func main() {
 		logger.Error.Println("Найдены ошибки " + err.Error())
 		return
 	}
+	logger.Info.Println("Догружаем переменные var")
+	err = pr.AppendVar()
+	if err != nil {
+		logger.Error.Println("Найдены ошибки " + err.Error())
+		return
+	}
 	pr.DefDrivers, err = project.LoadAllDrivers(prPath + "/settings/default")
 	if err != nil {
 		logger.Error.Println("Найдены ошибки " + err.Error())
