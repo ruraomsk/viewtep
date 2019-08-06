@@ -247,6 +247,14 @@ func main() {
 		logger.Error.Println("Найдены ошибки " + err.Error())
 		return
 	}
+	for _, s := range pr.Subsystems {
+		logger.Info.Println("Подсистема " + s.Name)
+		for _, v := range s.Variables {
+			if strings.Contains(v.Name, "var") {
+				logger.Info.Println(v.ToString())
+			}
+		}
+	}
 	pr.DefDrivers, err = project.LoadAllDrivers(prPath + "/settings/default")
 	if err != nil {
 		logger.Error.Println("Найдены ошибки " + err.Error())
