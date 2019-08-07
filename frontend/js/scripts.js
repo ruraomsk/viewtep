@@ -161,19 +161,27 @@ function addTableHeadForSubsystems(ips) {
     $('#main_table_head').html(headers.join(""));
 }
 
+function getSlugIdSubsystem( nameSubsystem, ipSubsystem, nameVariable ) {
+    //nameSubsystem+subsystems[nameSubsystem][i].replace(/\./g, '') +row['name']
+    return nameSubsystem + ipSubsystem.replace(/\./g, '') + nameVariable;
+}
+
 function getRowVariable(row, nameSubsystem) {
     var result = "<tr>";
     result += "<td><input type='checkbox' class='"+classSelectVariable+"' id='select_"+row['name']+"'";
     if ( isSelected(row['name']) && selectedItems.length > 0 ) {
         result += " checked";
     }
-
     result += "> "+ row['name'] +"</td>";
     result += "<td>"+ row['description'] +"</td>";
 
     for (var i = 0; i < subsystems[nameSubsystem].length; i++) {
-        result += "<td><input type='checkbox' class='checkboxes' name='"+ nameSubsystem+":"+subsystems[nameSubsystem][i]+"' value='"+row['name']+"'> ";
-        result += "<span class='" +nameSubsystem+subsystems[nameSubsystem][i].replace(/\./g, '') +row['name']+" editable' id='"+nameSubsystem+":"+subsystems[nameSubsystem][i]+"&name="+row['name']+"'> </span></td>";
+        result += "<td>";
+        result += "<input type='checkbox' class='checkboxes form-check-inline' name='"+ nameSubsystem+":"+subsystems[nameSubsystem][i]+"' value='"+row['name']+"'>";
+        result += "<span class='btn-edit editable' id='"+nameSubsystem+":"+subsystems[nameSubsystem][i]+"&name="+row['name']+"'>&#9998;</span> ";
+        result += "<span id='" +getSlugIdSubsystem(nameSubsystem, subsystems[nameSubsystem][i], row['name'])+"'> </span>";
+//        result += "<span class='editable' id='"+nameSubsystem+":"+subsystems[nameSubsystem][i]+"&name="+row['name']+"'><span id='" +nameSubsystem+subsystems[nameSubsystem][i].replace(/\./g, '') +row['name']+"'> </span></span>";
+        result += "</td>";
     }
     result += "</tr>";
     return result;
@@ -236,6 +244,7 @@ function getCurrentSubsystem(name) {
     clearAllCheckboxes();
 
     $.getJSON( urlCurrentSubsystem+name, function(data) {
+
         var items = [];
       
         $.each( data.variables, function() {
@@ -283,8 +292,9 @@ function updateValuesSubsystem() {
     for ( var i=0; i < subsystems[currentSubsystem].length; i++) {
         $.getJSON( urlValuesSubsystem+currentSubsystem+":"+subsystems[currentSubsystem][i], function(data) {
             const nameForID = data['name'].replace(/\./g, '');
+            var variableId;
             for ( var j=0; j < data['values'].length; j++  ) {
-                var variableId = "."+nameForID+data['values'][j]['name'];
+                variableId = "#"+nameForID+data['values'][j]['name'];
                 variableId=variableId.replace(':', '');
                 $(variableId).html(data['values'][j]['value'][0]);
             }
@@ -363,7 +373,9 @@ function updateContent() {
     }
 }
 
-function setRemoteValue(spanId, oldValue) {
+function setRemoteValue(spanId) {
+    var id = '#'+spanId.replace(/&name=/i,'').replace(/\./gi,'').replace(/:/, '');
+    var oldValue = $(id).html();
     var newValue = prompt("Enter new value: ", oldValue);
 
     if (newValue != null) {
@@ -454,6 +466,7 @@ $(document).ready(function(){
     });
 
     $(document).on('click', '.editable', function() {
-        setRemoteValue(this.id, this.innerHTML);        
+//        setRemoteValue(this.id, this.innerHTML);        
+        setRemoteValue(this.id);
     });
 });
