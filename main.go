@@ -6,6 +6,7 @@ import (
 	"os"
 	"runtime"
 	"rura/codetep/project"
+	"rura/teprol/logger"
 	"rura/viewtep/autoriz"
 	"rura/viewtep/mdbus"
 	"rura/viewtep/vars"
@@ -21,12 +22,12 @@ var aprov map[string]bool
 func respAllSubsystems(w http.ResponseWriter, r *http.Request) {
 	if !isLogged(r) {
 		w.WriteHeader(http.StatusUnauthorized)
-		fmt.Println("Need login ", r.RemoteAddr)
+		logger.Error.Println("Need login ", r.RemoteAddr)
 		return
 	}
 	res, err := vars.GetInfoRouters(routers)
 	if err != nil {
-		fmt.Println("Запрос ", err.Error())
+		logger.Error.Println("Запрос ", err.Error())
 		return
 	}
 	Sending(w, res)
@@ -34,7 +35,7 @@ func respAllSubsystems(w http.ResponseWriter, r *http.Request) {
 func respSubsystemInfo(w http.ResponseWriter, r *http.Request) {
 	if !isLogged(r) {
 		w.WriteHeader(http.StatusUnauthorized)
-		fmt.Println("Need login ", r.RemoteAddr)
+		logger.Error.Println("Need login ", r.RemoteAddr)
 		return
 	}
 	name := r.URL.Query().Get("name")
@@ -48,13 +49,13 @@ func respSubsystemInfo(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	if !ok {
-		fmt.Println("Запрос нет ", name)
+		logger.Error.Println("Запрос нет ", name)
 		return
 
 	}
 	res, err := vars.GetFullInfo(rout)
 	if err != nil {
-		fmt.Println("Запрос ", err.Error())
+		logger.Error.Println("Запрос ", err.Error())
 		return
 	}
 	Sending(w, res)
@@ -62,31 +63,36 @@ func respSubsystemInfo(w http.ResponseWriter, r *http.Request) {
 func respSubsystemValue(w http.ResponseWriter, r *http.Request) {
 	if !isLogged(r) {
 		w.WriteHeader(http.StatusUnauthorized)
-		fmt.Println("Need login ", r.RemoteAddr)
+		logger.Error.Println("Need login ", r.RemoteAddr)
 		return
 	}
+	// start := time.Now()
 	name := r.URL.Query().Get("name")
 	rout, ok := routers[name]
 	if !ok {
-		fmt.Println("Запрос нет ", name)
+		logger.Error.Println("Запрос нет ", name)
 		return
 	}
 	res, err := rout.JSONGetVal()
 	if err != nil {
-		fmt.Println("Запрос ", err.Error())
+		logger.Error.Println("Запрос ", err.Error())
 		return
 	}
+	// end := time.Now()
 	Sending(w, res)
+	// fullend := time.Now()
+	// logger.Info.Println("respSubsystemValue work ", name, " ", end.Sub(start), " ", fullend.Sub(start))
+
 }
 func respAllModbuses(w http.ResponseWriter, r *http.Request) {
 	if !isLogged(r) {
 		w.WriteHeader(http.StatusUnauthorized)
-		fmt.Println("Need login ", r.RemoteAddr)
+		logger.Error.Println("Need login ", r.RemoteAddr)
 		return
 	}
 	res, err := mdbus.GetInfoModbuses(drivers)
 	if err != nil {
-		fmt.Println("Запрос ", err.Error())
+		logger.Error.Println("Запрос ", err.Error())
 		return
 	}
 	Sending(w, res)
@@ -94,20 +100,20 @@ func respAllModbuses(w http.ResponseWriter, r *http.Request) {
 func respModbusInfo(w http.ResponseWriter, r *http.Request) {
 	if !isLogged(r) {
 		w.WriteHeader(http.StatusUnauthorized)
-		fmt.Println("Need login ", r.RemoteAddr)
+		logger.Error.Println("Need login ", r.RemoteAddr)
 		return
 	}
 	name := r.URL.Query().Get("name")
 	drv, ok := drivers[name]
 	if !ok {
-		fmt.Println("Запрос нет ", name)
+		logger.Error.Println("Запрос нет ", name)
 		return
 
 	}
 
 	res, err := drv.GetFullInfo()
 	if err != nil {
-		fmt.Println("Запрос ", err.Error())
+		logger.Error.Println("Запрос ", err.Error())
 		return
 	}
 	Sending(w, res)
@@ -115,20 +121,20 @@ func respModbusInfo(w http.ResponseWriter, r *http.Request) {
 func respModbusValue(w http.ResponseWriter, r *http.Request) {
 	if !isLogged(r) {
 		w.WriteHeader(http.StatusUnauthorized)
-		fmt.Println("Need login ", r.RemoteAddr)
+		logger.Error.Println("Need login ", r.RemoteAddr)
 		return
 	}
 	name := r.URL.Query().Get("name")
 	drv, ok := drivers[name]
 	if !ok {
-		fmt.Println("Запрос нет ", name)
+		logger.Error.Println("Запрос нет ", name)
 		return
 
 	}
 
 	res, err := drv.JSONGetVal()
 	if err != nil {
-		fmt.Println("Запрос ", err.Error())
+		logger.Error.Println("Запрос ", err.Error())
 		return
 	}
 	Sending(w, res)
@@ -146,7 +152,7 @@ func loginToSystem(w http.ResponseWriter, r *http.Request) {
 
 	if !users.ChekUser(login, password) {
 		w.WriteHeader(http.StatusUnauthorized)
-		fmt.Println("Login bad ", login, password)
+		logger.Error.Println("Login bad ", login, password)
 
 		return
 	}
@@ -158,7 +164,7 @@ func loginToSystem(w http.ResponseWriter, r *http.Request) {
 func respSetModbusValue(w http.ResponseWriter, r *http.Request) {
 	if !isLogged(r) {
 		w.WriteHeader(http.StatusUnauthorized)
-		fmt.Println("Need login ", r.RemoteAddr)
+		logger.Error.Println("Need login ", r.RemoteAddr)
 		return
 	}
 	mname := r.URL.Query().Get("modbus")
@@ -166,7 +172,7 @@ func respSetModbusValue(w http.ResponseWriter, r *http.Request) {
 	value := r.URL.Query().Get("value")
 	drv, ok := drivers[mname]
 	if !ok {
-		fmt.Println("Запрос нет ", mname, name, value)
+		logger.Error.Println("Запрос нет ", mname, name, value)
 		return
 
 	}
@@ -175,7 +181,7 @@ func respSetModbusValue(w http.ResponseWriter, r *http.Request) {
 func respSetSubsystemValue(w http.ResponseWriter, r *http.Request) {
 	if !isLogged(r) {
 		w.WriteHeader(http.StatusUnauthorized)
-		fmt.Println("Need login ", r.RemoteAddr)
+		logger.Error.Println("Need login ", r.RemoteAddr)
 		return
 	}
 	sname := r.URL.Query().Get("subsystem")
@@ -184,7 +190,7 @@ func respSetSubsystemValue(w http.ResponseWriter, r *http.Request) {
 
 	rout, ok := routers[sname]
 	if !ok {
-		fmt.Println("Запрос нет ", sname, name, value)
+		logger.Error.Println("Запрос нет ", sname, name, value)
 		return
 	}
 	rout.WriteVariable(name, value)
@@ -210,7 +216,7 @@ func gui() {
 	http.HandleFunc("/modvalue", respModbusValue)
 	http.HandleFunc("/setsubval", respSetSubsystemValue)
 	http.HandleFunc("/setmodval", respSetModbusValue)
-	fmt.Println("Listering on port 8080")
+	logger.Info.Println("Listering on port 8080")
 	err := http.ListenAndServe(":8080", nil)
 	if err != nil {
 		panic(err.Error())
@@ -218,26 +224,45 @@ func gui() {
 }
 func main() {
 
-	fmt.Println("Начало работы...")
+	err := logger.Init("/home/rura/log/viewtep")
+	if err != nil {
+		fmt.Println("Error openig logger subsystem", err.Error())
+		return
+	}
+	logger.Info.Println("Начало работы...")
 	prPath := ""
 	if len(os.Args) == 1 {
 		if runtime.GOOS == "linux" {
-			prPath = "/home/rura/dataSimul/pr"
+			prPath = "/home/rura/combo/data/pr"
 		} else {
 			prPath = "d:/combo/data/pr"
 		}
 	} else {
 		prPath = os.Args[1]
 	}
-	fmt.Println("Проект загружается из ", prPath)
+	logger.Info.Println("Проект загружается из - ", prPath)
 	pr, err := project.LoadProject(prPath)
 	if err != nil {
-		fmt.Println("Найдены ошибки " + err.Error())
+		logger.Error.Println("Найдены ошибки " + err.Error())
 		return
 	}
+	logger.Info.Println("Догружаем переменные var")
+	err = pr.AppendVar()
+	if err != nil {
+		logger.Error.Println("Найдены ошибки " + err.Error())
+		return
+	}
+	// for _, s := range pr.Subsystems {
+	// 	logger.Info.Println("Подсистема " + s.Name)
+	// 	for _, v := range s.Variables {
+	// 		if strings.Contains(v.Name, "var") {
+	// 			logger.Info.Println(v.ToString())
+	// 		}
+	// 	}
+	// }
 	pr.DefDrivers, err = project.LoadAllDrivers(prPath + "/settings/default")
 	if err != nil {
-		fmt.Println("Найдены ошибки " + err.Error())
+		logger.Error.Println("Найдены ошибки " + err.Error())
 		return
 	}
 	globalError := false
@@ -252,7 +277,7 @@ func main() {
 			}
 			dbus, err := mdbus.Init(sub.Name+":"+mb.Name, mb, s)
 			if err != nil {
-				fmt.Println("Modbus " + sub.Name + ":" + mb.Name + " Error " + err.Error())
+				logger.Error.Println("Modbus " + sub.Name + ":" + mb.Name + " Error " + err.Error())
 				globalError = true
 			} else {
 				drivers[dbus.Name] = dbus
@@ -260,7 +285,7 @@ func main() {
 		}
 		vr, err := vars.Init(sub, s, s.Main)
 		if err != nil {
-			fmt.Println("Rout " + sub.Name + " Error " + err.Error())
+			logger.Error.Println("Rout " + sub.Name + " Error " + err.Error())
 			globalError = true
 		} else {
 			routers[vr.Name] = vr
@@ -268,7 +293,7 @@ func main() {
 		if s.Main != s.Second {
 			vr, err := vars.Init(sub, s, s.Second)
 			if err != nil {
-				fmt.Println("Rout " + sub.Name + " Error " + err.Error())
+				logger.Error.Println("Rout " + sub.Name + " Error " + err.Error())
 				globalError = true
 			} else {
 				routers[vr.Name] = vr
@@ -281,7 +306,7 @@ func main() {
 		globalError = true
 	}
 	if globalError {
-		fmt.Println("Дальнейшая работа невозможна!")
+		logger.Error.Println("Дальнейшая работа невозможна!")
 		return
 	}
 	for _, r := range routers {
@@ -295,5 +320,5 @@ func main() {
 		time.Sleep(10 * time.Second)
 		// fmt.Print(".")
 	}
-	fmt.Println("Конец работы")
+	logger.Error.Println("Конец работы")
 }

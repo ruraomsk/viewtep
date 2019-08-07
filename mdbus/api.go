@@ -2,7 +2,7 @@ package mdbus
 
 import (
 	"encoding/json"
-	"fmt"
+	"rura/teprol/logger"
 	"time"
 )
 
@@ -256,11 +256,11 @@ func (d *Driver) SetNamedValues(names map[string]string) {
 
 		err := d.tr.writeVariable(reg, value)
 		if err != nil {
-			fmt.Println(err)
+			logger.Error.Println(err)
 		}
 		err = d.tr2.writeVariable(reg, value)
 		if err != nil {
-			fmt.Println(err)
+			logger.Error.Println(err)
 		}
 
 	}
