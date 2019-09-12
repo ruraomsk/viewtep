@@ -23,6 +23,17 @@ var configChart = {
     }
 };
 
+function getHash(source) {
+        var hash = 0, i, chr;
+        for (i = 0; i < source.length; i++) {
+          chr   = source.charCodeAt(i);
+          hash  = ((hash << 5) - hash) + chr;
+          hash |= 0; // Convert to 32bit integer
+        }
+        return hash;
+      
+}
+
 function getCurrentTime() {
     var today = new Date();
     var seconds = today.getSeconds();
@@ -57,6 +68,9 @@ function showValue(indx) {
 
                 configChart.data.datasets[indx].data.push(currentValue);
                 myChart.update();
+
+                var idValue = "#value" + getHash(chartViewData.data[indx]['name'] + ":" + chartViewData.data[indx]['value']);
+                $(idValue).html(currentValue);
                 break;
             }
         }
@@ -136,6 +150,15 @@ function showChart() {
     myChart.update();
 }
 
+function showTableValues() {
+    var out = "<table>";
+    for (var i=0; i < chartViewData.data.length; i++ ) {
+        out += "<tr><td>"+ chartViewData.data[i]['name'] + ":" + chartViewData.data[i]['value']+": </td><td id='value" + getHash(chartViewData.data[i]['name'] + ":" + chartViewData.data[i]['value']) + "'></td></tr>";
+    }
+    out += "</table>"
+    $("#values").html(out);    
+}
+
 $(document).ready(function(){
     const urlParams = new URLSearchParams(window.location.search);
     const data = urlParams.get('data');
@@ -146,6 +169,8 @@ $(document).ready(function(){
     showChart();
     startChartUpdating();
     isPause = false;
+
+    showTableValues();
 
     $('#btn-pause').click(function() {
         if ( !isPause ) {
