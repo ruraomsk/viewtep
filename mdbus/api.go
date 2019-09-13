@@ -14,20 +14,17 @@ type JInfoModbuses struct {
 
 //JModbus jsom one modbus
 type JModbus struct {
-	Name    string    `json:"name"`
-	IP1     string    `json:"ip1"`
-	IP2     string    `json:"ip2"`
-	Port    int       `json:"port"`
-	LastOp1 time.Time `json:"lastop1"`
-	LastOp2 time.Time `json:"lastop2"`
+	Name   string      `json:"name"`
+	IP     []string    `json:"ips"`
+	Port   []int       `json:"ports"`
+	LastOp []time.Time `json:"lastop"`
 }
 
 //JFullInfo для возврата JSON с полным описанием всех переменных Модбаса
 type JFullInfo struct {
-	Name      string `json:"name"`
-	IP1       string `json:"ip1"`
-	IP2       string `json:"ip2"`
-	Registers []Reg  `json:"registers"`
+	Name      string   `json:"name"`
+	IP        []string `json:"ips"`
+	Registers []Reg    `json:"registers"`
 }
 
 //Reg один регистр модбаса
@@ -60,11 +57,7 @@ func (d *Driver) JSONGetVal() ([]byte, error) {
 	di := make([]bool, d.lenDI)
 	ir := make([]uint16, d.lenIR)
 	hr := make([]uint16, d.lenHR)
-	if d.chanel == 0 {
-		coils, di, ir, hr = d.tr.get()
-	} else {
-		coils, di, ir, hr = d.tr2.get()
-	}
+	coils, di, ir, hr = d.tr[d.chanel].get()
 
 	for name, reg := range d.registers {
 		val := new(Value)
@@ -98,8 +91,9 @@ func (d *Driver) JSONGetVal() ([]byte, error) {
 func (d *Driver) GetFullInfo() ([]byte, error) {
 	j := new(JFullInfo)
 	j.Name = d.Name
-	j.IP1 = d.IP
-	j.IP2 = d.IP2
+	for i := 0; i < len(d.IP); i++ {
+		j.IP[i] = d.IP[i]
+	}
 	for name, reg := range d.registers {
 		r := new(Reg)
 		r.Name = name
@@ -121,11 +115,12 @@ func GetInfoModbuses(mbs map[string]*Driver) ([]byte, error) {
 	for _, mb := range mbs {
 		jm := new(JModbus)
 		jm.Name = mb.Name
-		jm.IP1 = mb.IP
-		jm.IP2 = mb.IP2
-		jm.Port = mb.Port
-		jm.LastOp1 = mb.LastOp(1)
-		jm.LastOp2 = mb.LastOp(2)
+		for i := 0; i < len(mb.tr); i++ {
+			jm.IP[i] = mb.IP[i]
+			jm.Port[i] = mb.Port[i]
+			jm.LastOp[i] = mb.LastOp(i)
+
+		}
 		j.Modbuses = append(j.Modbuses, *jm)
 	}
 	res, err := json.Marshal(j)
@@ -166,11 +161,8 @@ func (d *Driver) GetValues() map[string]string {
 	di := make([]bool, d.lenDI)
 	ir := make([]uint16, d.lenIR)
 	hr := make([]uint16, d.lenHR)
-	if d.chanel == 0 {
-		coils, di, ir, hr = d.tr.get()
-	} else {
-		coils, di, ir, hr = d.tr2.get()
-	}
+	d.setChanel()
+	coils, di, ir, hr = d.tr[d.chanel].get()
 
 	//fmt.Printf("%d %d %d %d ", len(coils), len(di), len(ir), len(hr))
 	for name, reg := range d.registers {
@@ -201,6 +193,18 @@ func (d *Driver) GetValues() map[string]string {
 	}
 	return r
 }
+func (d *Driver) setChanel() {
+	last := time.Unix(0, 0)
+	chanel := 0
+	for i := 0; i < len(d.tr); i++ {
+		if d.tr[i].lastop().After(last) {
+			last = d.tr[i].lastop()
+			chanel = i
+		}
+	}
+	d.chanel = chanel
+
+}
 
 //GetNamedValues возвращает запрошенные переменные в символьном виде
 func (d *Driver) GetNamedValues(names map[string]interface{}) map[string]string {
@@ -209,11 +213,8 @@ func (d *Driver) GetNamedValues(names map[string]interface{}) map[string]string 
 	di := make([]bool, d.lenDI)
 	ir := make([]uint16, d.lenIR)
 	hr := make([]uint16, d.lenHR)
-	if d.chanel == 0 {
-		coils, di, ir, hr = d.tr.get()
-	} else {
-		coils, di, ir, hr = d.tr2.get()
-	}
+	d.setChanel()
+	coils, di, ir, hr = d.tr[d.chanel].get()
 	//fmt.Printf("%d %d %d %d ", len(coils), len(di), len(ir), len(hr))
 	for name, reg := range d.registers {
 		if _, ok := names[name]; !ok {
@@ -253,14 +254,12 @@ func (d *Driver) SetNamedValues(names map[string]string) {
 	for name, value := range names {
 		// fmt.Printf("dev:%s name:%s value=%s \n", d.name, name, value)
 		reg, _ := d.registers[name]
+		for i := 0; i < len(d.tr); i++ {
+			err := d.tr[i].writeVariable(reg, value)
+			if err != nil {
+				logger.Error.Println(err)
+			}
 
-		err := d.tr.writeVariable(reg, value)
-		if err != nil {
-			logger.Error.Println(err)
-		}
-		err = d.tr2.writeVariable(reg, value)
-		if err != nil {
-			logger.Error.Println(err)
 		}
 
 	}

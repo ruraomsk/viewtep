@@ -33,15 +33,11 @@ type Driver struct {
 	connect     bool
 	work        bool
 	chanel      int
-	tr          DeviceInOut
-	tr2         DeviceInOut
+	tr          []DeviceInOut
 	Step        int
 	Restart     int
-
-	IP    string
-	Port  int
-	IP2   string
-	Port2 int
+	IP          []string
+	Port        []int
 }
 
 // Init подготавливает драйвер к работе
@@ -51,15 +47,16 @@ func Init(name string, dev project.Modbus, sub project.Sub) (*Driver, error) {
 	driver.Description = dev.Description
 	driver.Step = 500
 	driver.Restart = 5
-	driver.IP = sub.Main
-	driver.IP2 = sub.Second
-	driver.Port, _ = strconv.Atoi(dev.Port)
-	driver.Port2, _ = strconv.Atoi(dev.Port)
+	driver.IP = make([]string, 2)
+	driver.IP[0] = sub.Main
+	driver.IP[1] = sub.Second
+	driver.Port = make([]int, 2)
+	driver.Port[0], _ = strconv.Atoi(dev.Port)
+	driver.Port[1], _ = strconv.Atoi(dev.Port)
 	// fmt.Println("driver " + driver.name)
 	driver.registers = make(map[string]*Register, len(dev.Registers))
 	//fmt.Println("")
 	// Загружаем регистры
-	var err error
 	//fmt.Println(DT.Name)
 	for _, rec := range dev.Registers {
 		reg := new(Register)
@@ -74,20 +71,16 @@ func Init(name string, dev project.Modbus, sub project.Sub) (*Driver, error) {
 		driver.registers[reg.name] = reg
 	}
 	//fmt.Println("count",driver.lenCoil, driver.lenDI, driver.lenIR, driver.lenHR)
-	con := fmt.Sprintf("%s:%s", driver.IP, dev.Port)
-	d, err := master(driver, con)
-	if err != nil {
-		logger.Error.Println(err.Error())
-		return driver, err
+	driver.tr = make([]DeviceInOut, len(driver.IP))
+	for ip := 0; ip < len(driver.IP); ip++ {
+		con := fmt.Sprintf("%s:%d", driver.IP[ip], dev.Port[ip])
+		d, err := master(driver, con)
+		if err != nil {
+			logger.Error.Println(err.Error())
+			return driver, err
+		}
+		driver.tr[ip] = d
 	}
-	driver.tr = d
-	con = fmt.Sprintf("%s:%s", driver.IP2, dev.Port)
-	d, err = master(driver, con)
-	if err != nil {
-		logger.Error.Println(err.Error())
-		return driver, err
-	}
-	driver.tr2 = d
 	driver.work = true
 	return driver, nil
 }
@@ -98,43 +91,27 @@ func (d *Driver) loop() {
 	if d.Restart != 0 {
 		step = time.Duration(d.Restart) * time.Second
 	}
-
 	for {
 		//start := time.Now()
 		if !d.work {
 			return
 		}
-		if d.tr.worked() {
-			d.chanel = 0
-		} else {
-			d.tr.lock()
-			con := fmt.Sprintf("%s:%d", d.IP, d.Port)
+		for canel := 0; canel < len(d.tr); canel++ {
+			if d.tr[canel].worked() {
+				d.chanel = canel
+				continue
+			}
+			d.tr[canel].lock()
+			con := fmt.Sprintf("%s:%d", d.IP[canel], d.Port[canel])
 			dv, err := master(d, con)
-			d.tr.unlock()
+			d.tr[canel].unlock()
 			if err != nil {
 				logger.Error.Println(err.Error())
 			} else {
-				d.tr = dv
+				d.tr[canel] = dv
 				dv.start()
 			}
 		}
-		if d.tr2.worked() {
-			d.chanel = 1
-		} else {
-			d.tr2.lock()
-			con := fmt.Sprintf("%s:%d", d.IP2, d.Port2)
-			dv, err := master(d, con)
-			d.tr2.unlock()
-			if err != nil {
-				logger.Error.Println(err.Error())
-			} else {
-				d.tr2 = dv
-				dv.start()
-			}
-		}
-		//stop := time.Now()
-		//elapsed := stop.Sub(start)
-		// fmt.Println("driver "+d.name)
 		time.Sleep(step)
 
 	}
@@ -142,16 +119,18 @@ func (d *Driver) loop() {
 
 // Run запускает драйвер
 func (d *Driver) Run() {
-	d.tr.start()
-	d.tr2.start()
+	for i := 0; i < len(d.tr); i++ {
+		d.tr[i].start()
+	}
 	go d.loop()
 	//fmt.Println("Запустили Драйвер " + d.name)
 }
 
 // Stop останавливает драйвер
 func (d *Driver) Stop() {
-	d.tr.stop()
-	d.tr2.stop()
+	for i := 0; i < len(d.tr); i++ {
+		d.tr[i].stop()
+	}
 	d.work = false
 }
 
@@ -173,10 +152,13 @@ func (d *Driver) ToString() string {
 
 //LastOp return time last operation on driver
 func (d *Driver) LastOp(chanel int) time.Time {
-	if chanel == 1 {
-		return d.tr.lastop()
+	last := time.Unix(0, 0)
+	for i := 0; i < len(d.tr); i++ {
+		if d.tr[i].lastop().After(last) {
+			last = d.tr[i].lastop()
+		}
 	}
-	return d.tr2.lastop()
+	return last
 }
 
 //WriteVariable write value to out
@@ -185,6 +167,7 @@ func (d *Driver) WriteVariable(name string, value string) {
 	if !ok {
 		return
 	}
-	d.tr.writeVariable(reg, value)
-	d.tr2.writeVariable(reg, value)
+	for i := 0; i < len(d.tr); i++ {
+		d.tr[i].writeVariable(reg, value)
+	}
 }
