@@ -91,6 +91,7 @@ func (d *Driver) JSONGetVal() ([]byte, error) {
 func (d *Driver) GetFullInfo() ([]byte, error) {
 	j := new(JFullInfo)
 	j.Name = d.Name
+	j.IP = make([]string, len(d.IP))
 	for i := 0; i < len(d.IP); i++ {
 		j.IP[i] = d.IP[i]
 	}
