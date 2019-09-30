@@ -110,6 +110,7 @@ func (d *Driver) loop() {
 			} else {
 				d.tr[canel] = dv
 				dv.start()
+				logger.Info.Println("Restart ", d.Name, con)
 			}
 		}
 		time.Sleep(step)

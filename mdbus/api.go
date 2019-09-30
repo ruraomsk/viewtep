@@ -114,6 +114,9 @@ func GetInfoModbuses(mbs map[string]*Driver) ([]byte, error) {
 	j.Name = "modbuses"
 	for _, mb := range mbs {
 		jm := new(JModbus)
+		jm.IP = make([]string, len(mb.tr))
+		jm.Port = make([]int, len(mb.tr))
+		jm.LastOp = make([]time.Time, len(mb.tr))
 		jm.Name = mb.Name
 		for i := 0; i < len(mb.tr); i++ {
 			jm.IP[i] = mb.IP[i]
