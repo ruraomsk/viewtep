@@ -185,8 +185,12 @@ func (r *Register) GetInt(buffer []uint16, pos int) int {
 	if r.format < 4 {
 		//fmt.Print(len(buffer), " getInt "+r.ToString()+"\n")
 		//2 bytes
+		if r.format == 2 {
+			return int(uint16(buffer[r.address+pos]))
+
+		}
 		//fmt.Println(r.name, r.address, r.regtype, len(buffer))
-		return int(buffer[r.address+pos])
+		return int(int16(buffer[r.address+pos]))
 	}
 	if r.format < 8 {
 		//4 bytes
