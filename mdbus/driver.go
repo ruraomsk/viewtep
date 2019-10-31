@@ -45,7 +45,7 @@ func Init(name string, dev project.Modbus, sub project.Sub) (*Driver, error) {
 	driver := new(Driver)
 	driver.Name = name
 	driver.Description = dev.Description
-	driver.Step = 500
+	driver.Step = 1000
 	driver.Restart = 5
 	driver.IP = make([]string, 2)
 	driver.IP[0] = sub.Main
