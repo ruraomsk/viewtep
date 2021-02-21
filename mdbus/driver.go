@@ -3,8 +3,8 @@ package mdbus
 import (
 	"bytes"
 	"fmt"
+	"github.com/ruraomsk/TLServer/logger"
 	"rura/codetep/project"
-	"rura/teprol/logger"
 	"strconv"
 	"time"
 )

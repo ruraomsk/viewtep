@@ -2,7 +2,7 @@ package mdbus
 
 import (
 	"encoding/json"
-	"rura/teprol/logger"
+	"github.com/ruraomsk/TLServer/logger"
 	"time"
 )
 

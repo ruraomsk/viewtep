@@ -4,9 +4,9 @@ import (
 	"bytes"
 	"encoding/xml"
 	"fmt"
+	"github.com/ruraomsk/TLServer/logger"
 	"net"
 	"rura/codetep/project"
-	"rura/teprol/logger"
 	"strconv"
 	"strings"
 	"sync"
@@ -42,7 +42,7 @@ type Val struct {
 }
 
 //Init make one router
-func Init(sub *project.Subsystem, sop project.Sub, ip string) (*Router, error) {
+func Init(sub *project.Subsystem, ip string) (*Router, error) {
 	r := new(Router)
 	r.Name = sub.Name + ":" + ip
 	r.IP = ip
@@ -112,7 +112,7 @@ func (r *Router) readArrays() {
 			}
 			result.Write(buffer[:lenr])
 		}
-		conn.Close()
+		_ = conn.Close()
 		// st := result.String()
 		// fmt.Println(r.Name, v.Name, st)
 		res := strings.Split(strings.TrimRight(strings.TrimLeft(result.String(), " "), " "), " ")

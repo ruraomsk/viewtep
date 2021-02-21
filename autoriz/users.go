@@ -2,8 +2,8 @@ package autoriz
 
 import (
 	"encoding/xml"
+	"github.com/ruraomsk/TLServer/logger"
 	"io/ioutil"
-	"rura/teprol/logger"
 )
 
 //Users list all users

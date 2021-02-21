@@ -1,7 +1,7 @@
 package mdbus
 
 import (
-	"rura/teprol/logger"
+	"github.com/ruraomsk/TLServer/logger"
 	"sync"
 	"time"
 

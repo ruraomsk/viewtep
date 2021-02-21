@@ -2,11 +2,11 @@ package main
 
 import (
 	"fmt"
+	"github.com/ruraomsk/TLServer/logger"
 	"net/http"
 	"os"
 	"runtime"
 	"rura/codetep/project"
-	"rura/teprol/logger"
 	"rura/viewtep/autoriz"
 	"rura/viewtep/mdbus"
 	"rura/viewtep/vars"
@@ -283,7 +283,7 @@ func main() {
 				drivers[dbus.Name] = dbus
 			}
 		}
-		vr, err := vars.Init(sub, s, s.Main)
+		vr, err := vars.Init(sub, s.Main)
 		if err != nil {
 			logger.Error.Println("Rout " + sub.Name + " Error " + err.Error())
 			globalError = true
@@ -291,7 +291,7 @@ func main() {
 			routers[vr.Name] = vr
 		}
 		if s.Main != s.Second {
-			vr, err := vars.Init(sub, s, s.Second)
+			vr, err := vars.Init(sub, s.Second)
 			if err != nil {
 				logger.Error.Println("Rout " + sub.Name + " Error " + err.Error())
 				globalError = true
